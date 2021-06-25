@@ -1,0 +1,15 @@
+This is a Color & Font configuration file for CrossIDE.
+If hand edited, don't leave spaces before or after the '='.
+Edit at your own risk!
+
+Preprocessor=0x008080
+Comment=0x008000
+Number=0x0000ff
+Operator=0x800000
+Keyword=0xff0000
+Background=0x3c3c3c
+Text=0xffffff
+String=0x800080
+Function=0x800080
+FontSize=18
+FontFaceName=Courier New
