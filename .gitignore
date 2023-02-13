@@ -1,2 +1,5 @@
 
 *.ms14 (Security copy)
+db/*
+incremental_db/*
+output_files/*
