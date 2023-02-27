@@ -16,6 +16,7 @@ END BCDCOUNT;
 ARCHITECTURE a OF BCDCOUNT IS
 	SIGNAL ClkFlag : STD_LOGIC;
 	SIGNAL PM : STD_LOGIC;
+	SIGNAL Alarm_PM : STD_LOGIC;
 	SIGNAL Internal_Count : STD_LOGIC_VECTOR(28 DOWNTO 0);
 	SIGNAL HighDigit2, LowDigit2, HighDigit1, LowDigit1, HighDigit0, LowDigit0 : STD_LOGIC_VECTOR(3 DOWNTO 0);
 	SIGNAL AlarmHighDigit2, AlarmLowDigit2, AlarmHighDigit1, AlarmLowDigit1, AlarmHighDigit0, AlarmLowDigit0 : STD_LOGIC_VECTOR(3 DOWNTO 0);
@@ -46,10 +47,9 @@ BEGIN
 	PROCESS (ClkFlag, PM, CLK_ON, MODE_ALARM, KEY0, KEY1, KEY2, KEY3, SW0, SW1, SW2, SW3, SW4, SW5, SW6, SW7) -- display function
 	BEGIN
 		-------------------------------SET CLOCK TIME  -------------------------------------------------------------------------------------------
-
 		IF (CLK_ON = '1') THEN
-
 			IF (MODE_ALARM = '0') THEN -- set clock time
+				Alarm_PM <= PM;
 				-- set seconds
 				IF (KEY1 = '0') THEN -- latch seconds when KEY1 is pressed
 					LowDigit0(0) <= SW0;
@@ -180,7 +180,6 @@ BEGIN
 			END IF;
 
 			---------------CLOCK RUNNING --------------------------------------------------------------------------------------------------------------
-
 		ELSE
 			IF (KEY0 = '0') THEN -- reset all to 12:00
 				LowDigit0 <= "0000";
@@ -194,9 +193,10 @@ BEGIN
 				AlarmHighDigit0 <= "0000";
 				AlarmLowDigit1 <= "0000";
 				AlarmHighDigit1 <= "0000";
-				AlarmLowDigit2 <= "0010"; -- set to 2
-				AlarmHighDigit2 <= "0001"; -- set to 1
+				AlarmLowDigit2 <= "0000";
+				AlarmHighDigit2 <= "0000"; 
 				LEDR0 <= '0';	-- turn off LEDR0
+				Alarm_PM <= '0'; -- set to AM
 
 			ELSIF (ClkFlag'event AND ClkFlag = '1') THEN
 
@@ -233,7 +233,8 @@ BEGIN
 
 				-- check if alarm is set and if the time matches the alarm time then turn on LEDR0 and set alarm flag
 				IF (MODE_ALARM = '1') THEN
-					IF (LowDigit0 = AlarmLowDigit0 AND HighDigit0 = AlarmHighDigit0 AND
+					IF (PM = Alarm_PM AND
+						LowDigit0 = AlarmLowDigit0 AND HighDigit0 = AlarmHighDigit0 AND
 						LowDigit1 = AlarmLowDigit1 AND HighDigit1 = AlarmHighDigit1 AND
 						LowDigit2 = AlarmLowDigit2 AND HighDigit2 = AlarmHighDigit2) THEN
 						LEDR0 <= '1';	-- turn on LEDR0
@@ -267,7 +268,6 @@ BEGIN
 	END PROCESS;
 
 	---------------7 seg logic --------------------------------------------------------------------------------------------------------------
-
 	PROCESS (LowDigit2, HighDigit2, LowDigit1, HighDigit1, LowDigit0, HighDigit0)
 	BEGIN
 		-- 7 seg logic for seconds
