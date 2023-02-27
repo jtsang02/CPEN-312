@@ -18,6 +18,7 @@ ARCHITECTURE a OF BCDCOUNT IS
 	SIGNAL PM : STD_LOGIC;
 	SIGNAL Internal_Count : STD_LOGIC_VECTOR(28 DOWNTO 0);
 	SIGNAL HighDigit2, LowDigit2, HighDigit1, LowDigit1, HighDigit0, LowDigit0 : STD_LOGIC_VECTOR(3 DOWNTO 0);
+	SIGNAL AlarmHighDigit2, AlarmLowDigit2, AlarmHighDigit1, AlarmLowDigit1, AlarmHighDigit0, AlarmLowDigit0 : STD_LOGIC_VECTOR(3 DOWNTO 0);
 	SIGNAL MSD5_7SEG, LSD4_7SEG, MSD3_7SEG, LSD2_7SEG, MSD1_7SEG, LSD0_7SEG : STD_LOGIC_VECTOR(0 TO 6);
 
 BEGIN
@@ -42,45 +43,80 @@ BEGIN
 		END IF;
 	END PROCESS;
 
-	PROCESS (ClkFlag, PM, CLK_ON, MODE_ALARM, KEY0, KEY1, KEY2, KEY3, SW0, SW1, SW2, SW3, SW4, SW5, SW6, SW7, LowDigit2, HighDigit2, LowDigit1, HighDigit1, LowDigit0, HighDigit0) -- display function
+	PROCESS (ClkFlag, PM, CLK_ON, MODE_ALARM, KEY0, KEY1, KEY2, KEY3, SW0, SW1, SW2, SW3, SW4, SW5, SW6, SW7) -- display function
 	BEGIN
 		-------------------------------SET CLOCK TIME  -------------------------------------------------------------------------------------------
 
 		IF (CLK_ON = '1') THEN
-			-- set seconds
-			IF (KEY1 = '0') THEN -- latch seconds when KEY1 is pressed
-				LowDigit0(0) <= SW0;
-				LowDigit0(1) <= SW1;
-				LowDigit0(2) <= SW2;
-				LowDigit0(3) <= SW3;
-				HighDigit0(0) <= SW4;
-				HighDigit0(1) <= SW5;
-				HighDigit0(2) <= SW6;
-				HighDigit0(3) <= SW7;
-			END IF;
 
-			-- set minutes
-			IF (KEY2 = '0') THEN -- latch mins when KEY2 is pressed
-				LowDigit1(0) <= SW0;
-				LowDigit1(1) <= SW1;
-				LowDigit1(2) <= SW2;
-				LowDigit1(3) <= SW3;
-				HighDigit1(0) <= SW4;
-				HighDigit1(1) <= SW5;
-				HighDigit1(2) <= SW6;
-				HighDigit1(3) <= SW7;
-			END IF;
-
-			-- set hours
-			IF (KEY3 = '0') THEN -- latch hrs when KEY3 is pressed
-				LowDigit2(0) <= SW0;
-				LowDigit2(1) <= SW1;
-				LowDigit2(2) <= SW2;
-				LowDigit2(3) <= SW3;
-				HighDigit2(0) <= SW4;
-				HighDigit2(1) <= SW5;
-				HighDigit2(2) <= SW6;
-				HighDigit2(3) <= SW7;
+			IF (MODE_ALARM = '0') THEN -- set clock time
+				-- set seconds
+				IF (KEY1 = '0') THEN -- latch seconds when KEY1 is pressed
+					LowDigit0(0) <= SW0;
+					LowDigit0(1) <= SW1;
+					LowDigit0(2) <= SW2;
+					LowDigit0(3) <= SW3;
+					HighDigit0(0) <= SW4;
+					HighDigit0(1) <= SW5;
+					HighDigit0(2) <= SW6;
+					HighDigit0(3) <= SW7;
+				END IF;
+				-- set minutes
+				IF (KEY2 = '0') THEN -- latch mins when KEY2 is pressed
+					LowDigit1(0) <= SW0;
+					LowDigit1(1) <= SW1;
+					LowDigit1(2) <= SW2;
+					LowDigit1(3) <= SW3;
+					HighDigit1(0) <= SW4;
+					HighDigit1(1) <= SW5;
+					HighDigit1(2) <= SW6;
+					HighDigit1(3) <= SW7;
+				END IF;
+				-- set hours
+				IF (KEY3 = '0') THEN -- latch hrs when KEY3 is pressed
+					LowDigit2(0) <= SW0;
+					LowDigit2(1) <= SW1;
+					LowDigit2(2) <= SW2;
+					LowDigit2(3) <= SW3;
+					HighDigit2(0) <= SW4;
+					HighDigit2(1) <= SW5;
+					HighDigit2(2) <= SW6;
+					HighDigit2(3) <= SW7;
+				END IF;
+			ELSE -- set alarm time
+				-- set seconds
+				IF (KEY1 = '0') THEN -- latch seconds when KEY1 is pressed
+					AlarmLowDigit0(0) <= SW0;
+					AlarmLowDigit0(1) <= SW1;
+					AlarmLowDigit0(2) <= SW2;
+					AlarmLowDigit0(3) <= SW3;
+					AlarmHighDigit0(0) <= SW4;
+					AlarmHighDigit0(1) <= SW5;
+					AlarmHighDigit0(2) <= SW6;
+					AlarmHighDigit0(3) <= SW7;
+				END IF;
+				-- set minutes
+				IF (KEY2 = '0') THEN -- latch mins when KEY2 is pressed
+					AlarmLowDigit1(0) <= SW0;
+					AlarmLowDigit1(1) <= SW1;
+					AlarmLowDigit1(2) <= SW2;
+					AlarmLowDigit1(3) <= SW3;
+					AlarmHighDigit1(0) <= SW4;
+					AlarmHighDigit1(1) <= SW5;
+					AlarmHighDigit1(2) <= SW6;
+					AlarmHighDigit1(3) <= SW7;
+				END IF;
+				-- set hours
+				IF (KEY3 = '0') THEN -- latch hrs when KEY3 is pressed
+					AlarmLowDigit2(0) <= SW0;
+					AlarmLowDigit2(1) <= SW1;
+					AlarmLowDigit2(2) <= SW2;
+					AlarmLowDigit2(3) <= SW3;
+					AlarmHighDigit2(0) <= SW4;
+					AlarmHighDigit2(1) <= SW5;
+					AlarmHighDigit2(2) <= SW6;
+					AlarmHighDigit2(3) <= SW7;
+				END IF;
 			END IF;
 
 			-- make sure that the time is valid (0-12 hrs, 0-59 mins, 0-59 secs)
@@ -113,6 +149,36 @@ BEGIN
 				LowDigit2 <= "0000";
 			END IF;
 
+			-- make sure that the alarm time is valid (0-12 hrs, 0-59 mins, 0-59 secs)
+
+			IF (AlarmLowDigit0 > 9) THEN
+				AlarmLowDigit0 <= "0000"; -- if LSD seconds is greater than 9, set to 0
+			END IF;
+
+			IF (AlarmHighDigit0 > 5) THEN
+				AlarmHighDigit0 <= "0000"; -- if MSD seconds is greater than 5 set to 0			
+			END IF;
+
+			IF (AlarmLowDigit1 > 9) THEN
+				AlarmLowDigit1 <= "0000"; -- if LSD mins is greater than 9, set to 0
+			END IF;
+
+			IF (AlarmHighDigit1 > 5) THEN
+				AlarmHighDigit1 <= "0000"; -- if MSD mins greater than 5 set to 0		
+			END IF;
+
+			IF (AlarmLowDigit2 > 9) THEN
+				AlarmLowDigit2 <= "0000"; -- if LSD hours greater than 9 set to 0	
+			END IF;
+
+			IF (AlarmHighDigit2 > 1) THEN
+				AlarmHighDigit2 <= "0000"; -- if MSD hrs greater than 1 set to 0	
+			END IF;
+
+			IF (AlarmHighDigit2 >= 1 AND AlarmLowDigit2 > 2) THEN -- if hours is greater than 12 set to 0
+				AlarmLowDigit2 <= "0000";
+			END IF;
+
 			---------------CLOCK RUNNING --------------------------------------------------------------------------------------------------------------
 
 		ELSE
@@ -123,6 +189,14 @@ BEGIN
 				HighDigit1 <= "0000";
 				LowDigit2 <= "0010"; -- set to 2
 				HighDigit2 <= "0001"; -- set to 1
+				-- reset alarm time
+				AlarmLowDigit0 <= "0000";
+				AlarmHighDigit0 <= "0000";
+				AlarmLowDigit1 <= "0000";
+				AlarmHighDigit1 <= "0000";
+				AlarmLowDigit2 <= "0010"; -- set to 2
+				AlarmHighDigit2 <= "0001"; -- set to 1
+				LEDR0 <= '0';	-- turn off LEDR0
 
 			ELSIF (ClkFlag'event AND ClkFlag = '1') THEN
 
@@ -132,7 +206,7 @@ BEGIN
 					LowDigit0 = 0 AND HighDigit0 = 0) THEN
 					PM <= NOT PM;
 					LEDR9 <= PM;
-				END IF; 
+				END IF;
 
 				-- if 12:59:59 is reached, set to 1:00:00
 				IF (HighDigit2 = 1 AND LowDigit2 = 2 AND
@@ -145,7 +219,7 @@ BEGIN
 					HighDigit0 <= "0000";
 					LowDigit0 <= "0000";
 
-					-- if 9:59:59 is reached, set to 10:00:00
+				-- if 9:59:59 is reached, set to 10:00:00
 				ELSIF (HighDigit2 = 0 AND LowDigit2 = 9 AND
 					LowDigit1 = 9 AND HighDigit1 = 5 AND
 					LowDigit0 = 9 AND HighDigit0 = 5) THEN
@@ -155,7 +229,16 @@ BEGIN
 					LowDigit1 <= "0000";
 					HighDigit0 <= "0000";
 					LowDigit0 <= "0000";
-				END IF;				
+				END IF;
+
+				-- check if alarm is set and if the time matches the alarm time then turn on LEDR0 and set alarm flag
+				IF (MODE_ALARM = '1') THEN
+					IF (LowDigit0 = AlarmLowDigit0 AND HighDigit0 = AlarmHighDigit0 AND
+						LowDigit1 = AlarmLowDigit1 AND HighDigit1 = AlarmHighDigit1 AND
+						LowDigit2 = AlarmLowDigit2 AND HighDigit2 = AlarmHighDigit2) THEN
+						LEDR0 <= '1';	-- turn on LEDR0
+					END IF;
+				END IF;
 
 				IF (LowDigit0 = 9) THEN
 					LowDigit0 <= "0000";
@@ -181,8 +264,13 @@ BEGIN
 			END IF;
 		END IF;
 
-		---------------7 seg logic --------------------------------------------------------------------------------------------------------------
+	END PROCESS;
 
+	---------------7 seg logic --------------------------------------------------------------------------------------------------------------
+
+	PROCESS (LowDigit2, HighDigit2, LowDigit1, HighDigit1, LowDigit0, HighDigit0)
+	BEGIN
+		-- 7 seg logic for seconds
 		CASE LowDigit2 IS
 			WHEN "0000" => LSD4_7SEG <= "0000001";
 			WHEN "0001" => LSD4_7SEG <= "1001111";
@@ -211,6 +299,7 @@ BEGIN
 			WHEN OTHERS => MSD5_7SEG <= "1111111";
 		END CASE;
 
+		-- 7 seg logic for minutes
 		CASE LowDigit1 IS
 			WHEN "0000" => LSD2_7SEG <= "0000001";
 			WHEN "0001" => LSD2_7SEG <= "1001111";
@@ -239,6 +328,7 @@ BEGIN
 			WHEN OTHERS => MSD3_7SEG <= "1111111";
 		END CASE;
 
+		-- 7 seg logic for hours
 		CASE LowDigit0 IS
 			WHEN "0000" => LSD0_7SEG <= "0000001";
 			WHEN "0001" => LSD0_7SEG <= "1001111";
