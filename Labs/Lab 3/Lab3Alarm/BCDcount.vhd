@@ -108,6 +108,7 @@ BEGIN
 			IF (HighDigit2 > 1) THEN
 				HighDigit2 <= "0000"; -- if MSD hrs greater than 1 set to 0	
 			END IF;
+
 			IF (HighDigit2 >= 1 AND LowDigit2 > 2) THEN -- if hours is greater than 12 set to 0
 				LowDigit2 <= "0000";
 			END IF;
@@ -131,39 +132,50 @@ BEGIN
 					LowDigit0 = 0 AND HighDigit0 = 0) THEN
 					PM <= NOT PM;
 					LEDR9 <= PM;
-				END IF;
+				END IF; 
 
-				IF (LowDigit0 = 9) THEN -- seconds counter
+				-- if 12:59:59 is reached, set to 1:00:00
+				IF (HighDigit2 = 1 AND LowDigit2 = 2 AND
+					LowDigit1 = 9 AND HighDigit1 = 5 AND
+					LowDigit0 = 9 AND HighDigit0 = 5) THEN
+					HighDigit2 <= "0000";
+					LowDigit2 <= "0001";
+					HighDigit1 <= "0000";
+					LowDigit1 <= "0000";
+					HighDigit0 <= "0000";
+					LowDigit0 <= "0000";
+
+					-- if 9:59:59 is reached, set to 10:00:00
+				ELSIF (HighDigit2 = 0 AND LowDigit2 = 9 AND
+					LowDigit1 = 9 AND HighDigit1 = 5 AND
+					LowDigit0 = 9 AND HighDigit0 = 5) THEN
+					HighDigit2 <= "0001";
+					LowDigit2 <= "0000";
+					HighDigit1 <= "0000";
+					LowDigit1 <= "0000";
+					HighDigit0 <= "0000";
+					LowDigit0 <= "0000";
+				END IF;				
+
+				IF (LowDigit0 = 9) THEN
 					LowDigit0 <= "0000";
 					IF (HighDigit0 = 5) THEN
 						HighDigit0 <= "0000";
-						LowDigit1 <= LowDigit1 + '1';
+						IF (LowDigit1 = 9) THEN
+							LowDigit1 <= "0000";
+							IF (HighDigit1 = 5) THEN
+								HighDigit1 <= "0000";
+							ELSE
+								HighDigit1 <= HighDigit1 + 1;
+							END IF;
+						ELSE
+							LowDigit1 <= LowDigit1 + 1;
+						END IF;
 					ELSE
 						HighDigit0 <= HighDigit0 + '1';
 					END IF;
 				ELSE
 					LowDigit0 <= LowDigit0 + '1';
-				END IF;
-
-				IF (LowDigit1 = 9) THEN -- minutes counter
-					LowDigit1 <= "0000";
-					IF (HighDigit1 = 5) THEN
-						HighDigit1 <= "0000";
-						LowDigit2 <= LowDigit2 + '1';
-					ELSE
-						HighDigit1 <= HighDigit1 + '1';
-					END IF;
-				END IF;
-
-				IF (LowDigit2 = 2) THEN
-					IF (HighDigit2 = 1) THEN
-						IF (HighDigit1 = 5 AND LowDigit1 = 9 AND HighDigit0 = 5 AND LowDigit0 = 9) THEN
-								LowDigit2 <= "0001";	-- set to 1
-								HighDigit2 <= "0000";	-- set to 0
-						END IF;
-					ELSE
-						HighDigit2 <= HighDigit2 + '1';
-					END IF;
 				END IF;
 
 			END IF;
