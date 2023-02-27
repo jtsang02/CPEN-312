@@ -83,7 +83,7 @@ BEGIN
 				HighDigit2(3) <= SW7;
 			END IF;
 
-			-- make sure that the time is valid (0-23 hrs, 0-59 mins, 0-59 secs)
+			-- make sure that the time is valid (0-12 hrs, 0-59 mins, 0-59 secs)
 
 			IF (LowDigit0 > 9) THEN
 				LowDigit0 <= "0000"; -- if LSD seconds is greater than 9, set to 0
@@ -105,23 +105,12 @@ BEGIN
 				LowDigit2 <= "0000"; -- if LSD hours greater than 9 set to 0	
 			END IF;
 
-			-- IF (MODE_ALARM = '0') THEN
-			-- LEDR8 <= '1';
 			IF (HighDigit2 > 1) THEN
 				HighDigit2 <= "0000"; -- if MSD hrs greater than 1 set to 0	
 			END IF;
-			IF (HighDigit2 >= 1 AND LowDigit2 > 2) THEN
+			IF (HighDigit2 >= 1 AND LowDigit2 > 2) THEN -- if hours is greater than 12 set to 0
 				LowDigit2 <= "0000";
 			END IF;
-			-- ELSE
-			-- 	LEDR8 <= '0';
-			-- 	IF (HighDigit2 > 2) THEN
-			-- 		HighDigit2 <= "0000"; -- if MSD hrs greater than 1 set to 0	
-			-- 	END IF;
-			-- 	IF (HighDigit2 >= 2 AND LowDigit2 > 4) THEN
-			-- 		LowDigit2 <= "0000";
-			-- 	END IF;
-			-- END IF;
 
 			---------------CLOCK RUNNING --------------------------------------------------------------------------------------------------------------
 
@@ -131,10 +120,19 @@ BEGIN
 				HighDigit0 <= "0000";
 				LowDigit1 <= "0000";
 				HighDigit1 <= "0000";
-				LowDigit2 <= "0010";
-				HighDigit2 <= "0001";
+				LowDigit2 <= "0010"; -- set to 2
+				HighDigit2 <= "0001"; -- set to 1
 
 			ELSIF (ClkFlag'event AND ClkFlag = '1') THEN
+
+				-- change PM to AM and vice versa when 12:00:00 is reached
+				IF (LowDigit2 = 2 AND HighDigit2 = 1 AND
+					LowDigit1 = 0 AND HighDigit1 = 0 AND
+					LowDigit0 = 0 AND HighDigit0 = 0) THEN
+					PM <= NOT PM;
+					LEDR9 <= PM;
+				END IF;
+
 				IF (LowDigit0 = 9) THEN -- seconds counter
 					LowDigit0 <= "0000";
 					IF (HighDigit0 = 5) THEN
@@ -157,31 +155,21 @@ BEGIN
 					END IF;
 				END IF;
 
-				IF (MODE_ALARM = '0') THEN
-					-- LEDR8 <= '1'; -- 12 hour counter
-					IF (LowDigit2 = 2) THEN
-						IF (HighDigit2 = 1) THEN
-							PM <= NOT PM;
-							LEDR9 <= PM;
-							HighDigit2 <= "0000";
-							LowDigit2 <= "0000";
-						ELSE
-							HighDigit2 <= HighDigit2 + '1';
+				IF (LowDigit2 = 2) THEN
+					IF (HighDigit2 = 1) THEN
+						IF (HighDigit1 = 5 AND LowDigit1 = 9 AND HighDigit0 = 5 AND LowDigit0 = 9) THEN
+								LowDigit2 <= "0001";	-- set to 1
+								HighDigit2 <= "0000";	-- set to 0
 						END IF;
+					ELSE
+						HighDigit2 <= HighDigit2 + '1';
 					END IF;
-					-- else
-					--     LEDR8<='0';                   -- 24 hour counter                    
-					--     if (LowDigit2=4) then                    
-					-- 	    if (HighDigit2=2) then
-					-- 		    HighDigit2<="0000";
-					--    		    LowDigit2<="0000";
-					-- 	    else 
-					--    		    HighDigit2<=HighDigit2+'1';
-					-- 	    end if;
-					--     end if;
 				END IF;
+
 			END IF;
 		END IF;
+
+		---------------7 seg logic --------------------------------------------------------------------------------------------------------------
 
 		CASE LowDigit2 IS
 			WHEN "0000" => LSD4_7SEG <= "0000001";
