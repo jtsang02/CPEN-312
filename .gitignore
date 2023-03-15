@@ -8,3 +8,5 @@ output_files/
 *.xrf
 *.zip
 *.mp4
+*.lst
+*.hex
