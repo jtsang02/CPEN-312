@@ -67,9 +67,10 @@ main:
 	subb a, R4
 	mov R4, a
 	
-	
+	setb c	; because we need minuend + nine+complmement (R5R4) + 1
 	mov a, R6
-	subb a, R4
+	addc a, R4
+	da a
 	mov R2, a
 	
 	mov a, R7
