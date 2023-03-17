@@ -16,7 +16,7 @@ main:
 	
 	mov dptr, #T_7seg
 	
-	mov R7, #0x80	; this is the number we want to convert
+	mov R7, #0xaa	; this is the number we want to convert
 	mov a, R7		; get the MSD
 	mov b, #100
 	div ab
