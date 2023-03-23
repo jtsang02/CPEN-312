@@ -1,5 +1,5 @@
 @echo off
-C:
-cd "\Users\Josiah's MSi\Documents\UBC\CPEN 312\Lab\Lab 5\"
-"C:\CrossIDE\Call51\Bin\a51.exe" -l "C:\Users\Josiah's MSi\Documents\UBC\CPEN 312\Lab\Lab 5\calculator.asm"
-echo Crosside_Action Set_Hex_File C:\Users\Josiah's MSi\Documents\UBC\CPEN 312\Lab\Lab 5\calculator.HEX
+D:
+cd "\Documents\UBC\CPEN 312\CPEN-312\2020W\Lab 5\"
+"C:\CrossIDE\Call51\Bin\a51.exe" -l "D:\Documents\UBC\CPEN 312\CPEN-312\2020W\Lab 5\Read_sw6.asm"
+echo Crosside_Action Set_Hex_File D:\Documents\UBC\CPEN 312\CPEN-312\2020W\Lab 5\Read_sw6.HEX
