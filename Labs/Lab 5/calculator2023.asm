@@ -151,9 +151,12 @@ modulus:
 	; now subtract the product from x
 	lcall sub32 ; x = x - y	
 	ret
-	
+
 percentage:
-	ret
+    lcall mul32 ; x = x * y
+	Load_y(100)	; now divide by 100
+	lcall div32; x = x / y
+    ret
 
 sqrt:
 	mov R4, x+0 ;saving x value
