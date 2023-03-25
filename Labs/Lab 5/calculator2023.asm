@@ -1,7 +1,7 @@
 $modde0cv
 
 	CSEG at 0
-	ljmp mycode
+	ljmp init
 
 dseg at 30h
 
@@ -10,7 +10,7 @@ y:		ds	4 ; 32-bits for variable 'y'
 bcd:	ds	5 ; 10-digit packed BCD (each byte stores 2 digits)
 
 bseg
-
+							
 mf:		dbit 1 ; math functions flag
 
 $include(math32.asm)
@@ -123,12 +123,18 @@ ReadNumber_L2:
 ReadNumber_no_number:
 	clr c
 	ret
-	
-mycode:
-	mov SP, #7FH
+
+clear_LEDs:	; Clear all LEDs
 	clr a
 	mov LEDRA, a
 	mov LEDRB, a
+	ret
+
+;;;;;;;;;;;;;;;;;;;;;; start of main program ;;;;;;;;;;;;;;;;;;;;;;
+
+init:
+	mov SP, #7FH
+	lcall clear_LEDs
 	mov bcd+0, a
 	mov bcd+1, a
 	mov bcd+2, a
@@ -136,18 +142,63 @@ mycode:
 	mov bcd+4, a
 	lcall Display
 
-mov b, #0 ; b=0:addition, b=1:subtraction, etc. 
-setb LEDRA.0 ; Turn LEDR0 on to indicate addition
+main_loop:  	
+  	mov a, b
+  	cjne a, #0, not_0
+  	mov b, #0
+  	lcall clear_LEDs
+  	setb LEDRA.0	; set LEDR0 for addition
+  	sjmp check_funct
 
-forever: 
+not_0:	
+	cjne a, #1, not_1
+	mov b, #1
+	lcall clear_LEDs
+	setb LEDRA.1	; set LEDR1 for subtraction
+	sjmp check_funct
+
+not_1:  
+	cjne a, #2, not_2
+	mov b, #2
+	lcall clear_LEDs
+	setb LEDRA.2	; set LEDR2 for multiplication
+	sjmp check_funct
+
+not_2:
+	cjne a, #3, not_3
+	mov b, #3
+	lcall clear_LEDs
+	setb LEDRA.3	; set LEDR3 for division
+	sjmp check_funct
+
+not_3:
+	cjne a, #4, not_4
+	mov b, #4
+	lcall clear_LEDs
+	setb LEDRA.4	; set LEDR4 for modulus
+	sjmp check_funct
+
+not_4:
+	cjne a, #5, not_5
+	mov b, #5
+	lcall clear_LEDs
+	setb LEDRA.5	; set LEDR5 for percentage
+	sjmp check_funct
+
+not_5:
+	mov b, #6	
+	lcall clear_LEDs
+	setb LEDRA.6	; set LEDR6 for square root
+
+check_funct: 
 	; This is a good spot to set the LEDs for each operation... 
 	jb KEY.3, no_funct ; If 'Function' key not pressed, skip
 	jnb KEY.3, $ ; Wait for release of 'Function' key
 	inc b ; 'b' is used as function select 
 	mov a, b ; make sure b is not larger than 5
-	cjne a, #6, forever ; ^
-	mov b, #0 ; ^
-	ljmp forever ; Go check for more input
+	cjne a, #6, main_loop ; if b is 6, skip to main_loop
+	mov b, #0 ; b is 3, set it to 0
+	ljmp main_loop ; Go check for more input
 
 no_funct: 
 	jb KEY.2, no_load ; If 'Load' key not pressed, skip
@@ -157,30 +208,84 @@ no_funct:
 	Load_X(0) ; Clear x (this is a macro)
 	lcall hex2bcd ; Convert result in x to BCD
 	lcall Display ; Display the new BCD number
-	ljmp forever ; Go check for more input
+	ljmp main_loop ; Go check for more input
 
 no_load: 
 	jb KEY.1, no_equal ; If 'equal' key not pressed, skip
 	jnb KEY.1, $ ; Wait for user to release 'equal' key 
-	lcall bcd2hex ; Convert the BCD number to hex in x 
+	lcall bcd2hex ; Convert the BCD number to hex in x
+	; lcall xchg_xy ; Exchange x and y  
 	mov a, b ; Check if we are doing addition
 	cjne a, #0, no_add ; ^
 	lcall add32 ; Perform x+y 
 	lcall hex2bcd ; Convert result in x to BCD
 	lcall Display ; Display the new BCD number
-	ljmp forever ; Go check for more input 
+	ljmp main_loop ; Go check for more input 
 
 no_add: 
-	; Other operations maybe coded here
+	cjne a, #1, no_sub ; ^
+	lcall xchg_xy
+	lcall sub32 ; Perform x-y
+	lcall hex2bcd ; Convert result in x to BCD
+	lcall Display ; Display the new BCD number
+	ljmp main_loop ; Go check for more input
+
+no_sub:
+	cjne a, #2, no_mul ; ^
+	lcall xchg_xy
+	lcall mul32 ; Perform x*y
+	lcall hex2bcd ; Convert result in x to BCD
+	lcall Display ; Display the new BCD number
+	ljmp main_loop ; Go check for more input
+
+no_mul:
+	cjne a, #3, no_div ; ^
+	lcall xchg_xy
+	lcall div32 ; Perform x/y
+	lcall hex2bcd ; Convert result in x to BCD
+	lcall Display ; Display the new BCD number
+	ljmp main_loop ; Go check for more input
+
+no_div:
+	cjne a, #4, no_mod  ; ^ 
+ 	lcall remainder     ; Perform x%y 
+ 	lcall hex2bcd       ; Convert result in x to BCD 
+ 	lcall Display       ; Display the new BCD number 
+ 	ljmp main_loop		; Go check for more input
+
+no_mod:
+	cjne a, #5, no_percent ; ^
+	lcall percentage 	; Perform percentage
+ 	lcall hex2bcd       ; Convert result in x to BCD 
+ 	lcall Display       ; Display the new BCD number 
+ 	ljmp main_loop  
+
+no_percent:
+	cjne a, #6, no_equal ; ^
+	lcall sqrt         	; Perform sqrt
+ 	lcall hex2bcd       ; Convert result in x to BCD 
+ 	lcall Display       ; Display the new BCD number 
+ 	ljmp main_loop
 
 no_equal: 
 	; get more numbers 
 	lcall ReadNumber 
-	jnc no_new_digit ; Indirect jump to 'forever'
+	jnc no_new_digit ; Indirect jump to 'main_loop'
 	lcall Shift_Digits 
 	lcall Display 
 
 no_new_digit: 
-	ljmp forever ; 'forever' is to far away, need to use ljmp
+	ljmp main_loop ; 'main_loop' is to far away, need to use ljmp
+
+remainder:
+	ret
+
+percentage:
+	ret
+
+sqrt:
+	ret
+
+nothing:
 
 end
