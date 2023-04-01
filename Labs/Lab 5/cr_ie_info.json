@@ -1,0 +1,22 @@
+{
+	"system" : {
+		"platform" : "windows64",
+		"os_name" : "Windows 10",
+		"os_version" : "10.0"
+	},
+	"error" : {
+		"executable" : "quartus_stp",
+		"comment" : "not_applicable",
+		"error_message" : "node_mod_ram != NULL",
+		"source_file" : "/quartus/sld/sli/sli_tcl_mod_ram.cpp",
+		"line" : "135",
+		"stack_trace" : "\t0x7ffb7d0f0896: sld_sli + 0x10896 (sli_get_editable_mem_instances + 0x3f6)\n\t 0x53ce4410: tcl86 + 0x14410 (TclInvokeStringCommand + 0xf0)\n\t 0x53ce61e2: tcl86 + 0x161e2 (TclNRRunCallbacks + 0x62)\n\t 0x53ce7a65: tcl86 + 0x17a65 (TclEvalEx + 0xa65)\n\t 0x53da53b0: tcl86 + 0xd53b0 (TclSubstTokens + 0x300)\n\t 0x53ce75a4: tcl86 + 0x175a4 (TclEvalEx + 0x5a4)\n\t 0x53d76f8b: tcl86 + 0xa6f8b (Tcl_FSEvalFileEx + 0x22b)\n\t 0x53d75646: tcl86 + 0xa5646 (Tcl_EvalFile + 0x36)\n\t0x7ffb86432606: comp_qexe + 0x12606 (?qexe_evaluate_tcl_script@@YA_NAEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z + 0x376)\n\t0x7ffb86431864: comp_qexe + 0x11864 (qexe_do_tcl + 0x334)\n\t0x7ffb86435fe6: comp_qexe + 0x15fe6 (qexe_run + 0x2d6)\n\t0x7ffb86436e51: comp_qexe + 0x16e51 (?qexe_standard_main@@YAHPEAVQEXE_FRAMEWORK@@PEAPEBUQEXE_OPTION_DEFINITION@@HPEAPEBD@Z + 0xc1)\n\t0x7ff6f9ff3822: quartus_stp + 0x3822 (?ice_main@@YAHHPEAPEBD@Z + 0x52)\n\t0x7ffb93563328: CCL_MSG + 0x13328 (?msg_main_thread@@YAPEAXPEAX@Z + 0x18)\n\t0x7ffb93564b0e: CCL_MSG + 0x14b0e (?msg_thread_wrapper@@YAPEAXP6APEAXPEAX@Z0@Z + 0x6e)\n\t0x7ffb93775b00: ccl_mem + 0x15b00 (?mem_thread_wrapper@@YAPEAXP6APEAXPEAX@Z0@Z + 0x70)\n\t0x7ffb93562a11: CCL_MSG + 0x12a11 (?msg_exe_main@@YAHHPEAPEBDP6AHH0@Z@Z + 0xa1)\n\t0x7ff6f9ff42d2: quartus_stp + 0x42d2 (__tmainCRTStartup + 0x10e)\n\t0x7ffbac0c26bc: KERNEL32 + 0x126bc (BaseThreadInitThunk + 0x1c)\n\t0x7ffbace0a9f7: ntdll + 0x5a9f7 (RtlUserThreadStart + 0x27)\n",
+		"subsystem" : "SLI"
+	},
+	"quartus" : {
+		"quartus_bits" : "64",
+		"version" : "16.1.0",
+		"build" : "196",
+		"edition" : "Lite Edition"
+	}
+}
